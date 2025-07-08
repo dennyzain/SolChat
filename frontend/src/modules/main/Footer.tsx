@@ -20,7 +20,7 @@ export default function Footer() {
                 contained={true}
             />
             <div className="absolute w-[90%] mx-auto inset-0 flex items-center justify-center rounded-xl">
-                <img src={Logo} alt="Logo" width={500} height={500} />
+                <img src={Logo} alt="Logo" width={300} height={300} />
             </div>
         </div>
     )
