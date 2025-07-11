@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Socket.io Connection Test</title>
+</head>
+
+<body>
+    <button id="send-message">Send Message</button>
+    <script src="https://cdn.socket.io/4.8.1/socket.io.min.js"></script>
+    <script>
+        const socket = io("http://localhost:8080");
+        socket.on("connect", () => {
+            console.log("connected", socket.id);
+        });
+        document.getElementById("send-message").addEventListener("click", () => {
+            socket.emit("message", { text: "Hello World 2" });
+        });
+    </script>
+</body>
+
+</html>
