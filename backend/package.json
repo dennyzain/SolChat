@@ -2,13 +2,18 @@
   "name": "solchat",
   "type": "module",
   "scripts": {
-    "start": "bun run src/index.ts",
-    "dev": "bun run --watch --env-file=.env src/index.ts"
+    "start": "bun run index.ts",
+    "dev": "bun run --watch --env-file=.env index.ts",
+    "prisma:pull": "prisma db pull",
+    "prisma:generate": "prisma generate",
+    "prisma:migrate": "prisma migrate dev --name solchat",
+    "prisma:studio": "prisma studio"
   },
   "peerDependencies": {
     "typescript": "^5.0.0"
   },
   "dependencies": {
+    "@prisma/client": "^6.11.1",
     "@solana/web3.js": "^1.98.2",
     "cors": "^2.8.5",
     "express": "^5.1.0",
@@ -19,6 +24,7 @@
   },
   "devDependencies": {
     "@types/bun": "latest",
-    "@types/express": "^5.0.3"
+    "@types/express": "^5.0.3",
+    "@types/jsonwebtoken": "^9.0.10"
   }
 }
