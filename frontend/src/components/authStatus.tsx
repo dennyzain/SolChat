@@ -1,9 +1,9 @@
-import { useAuth } from "../hooks/useAuth"
+import { useAuthStore } from '../store'
 import { Badge } from "./ui/badge"
 import { CheckCircle, XCircle, Clock } from "lucide-react"
 
 export function AuthStatus() {
-    const { isAuthenticated, jwtToken, isAuthenticating } = useAuth()
+    const { isAuthenticated, jwtToken, isAuthenticating } = useAuthStore()
 
     const truncateToken = (token: string) => {
         if (token.length <= 20) return token

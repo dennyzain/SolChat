@@ -6,153 +6,81 @@ import {
     ChatMessageContent,
 } from "../../components/ui/chat/chat-message";
 import { motion } from "motion/react";
-import { useAuth } from "../../hooks/useAuth";
+import { useAuthStore } from '../../store'
 import { ScrollArea } from "../../components/ui/scroll-area";
 import clsx from "clsx";
+import { instance } from "../../services/interceptor";
+import { toast } from "sonner";
+import { io, Socket } from "socket.io-client";
 
 
 
 interface ConversationMessage {
-    id: string;
-    walletAddress: string;
-    message: string;
-    type: "user" | "assistant";
-    timestamp: number;
+    id: string,
+    userId: string,
+    content: string,
+    walletAddress: string,
+    createdAt: Date
 }
 
-const messages: ConversationMessage[] = [
-    {
-        id: "1",
-        walletAddress: "0xUserWallet1",
-        message: "Can you tell me a story? Maybe something about a magical forest?",
-        type: "user",
-        timestamp: Date.now() - 1000 * 60 * 10,
-    },
-    {
-        id: "2",
-        walletAddress: "0xAssistantWallet",
-        message: "Of course! I'd love to tell you a story about the Whispering Woods. Would you like to hear it?",
-        type: "assistant",
-        timestamp: Date.now() - 1000 * 60 * 9,
-    },
-    {
-        id: "3",
-        walletAddress: "0xUserWallet1",
-        message: "Yes, please! I'm excited to hear it!",
-        type: "user",
-        timestamp: Date.now() - 1000 * 60 * 8,
-    },
-    {
-        id: "4",
-        walletAddress: "0xAssistantWallet",
-        message: "Deep in the heart of the Whispering Woods, there lived a young fox named Luna with fur as silver as moonlight. Unlike other foxes, Luna had the magical ability to speak with the ancient trees that surrounded her home.",
-        type: "assistant",
-        timestamp: Date.now() - 1000 * 60 * 7,
-    },
-    {
-        id: "5",
-        walletAddress: "0xAssistantWallet",
-        message:
-            "One day, Luna discovered that the oldest tree in the forest had fallen silent. This was very unusual, as this particular oak tree loved telling stories about the forest's history. Concerned, Luna decided to investigate.",
-        type: "assistant",
-        timestamp: Date.now() - 1000 * 60 * 6,
-    },
-    {
-        id: "6",
-        walletAddress: "0xUserWallet1",
-        message: "Oh no! What happened to the old oak tree?",
-        type: "user",
-        timestamp: Date.now() - 1000 * 60 * 5,
-    },
-    {
-        id: "7",
-        walletAddress: "0xAssistantWallet",
-        message:
-            "As Luna approached the ancient oak, she noticed something glowing at its roots - a tiny crystal that pulsed with a soft blue light. The tree had been protecting this crystal for centuries, and now it was losing its power.",
-        type: "assistant",
-        timestamp: Date.now() - 1000 * 60 * 4,
-    },
-    {
-        id: "8",
-        walletAddress: "0xAssistantWallet",
-        message:
-            "Luna knew she had to help. She gathered dewdrops from spider webs at dawn, collected starlight in flower petals at night, and asked the wind to share its oldest songs. With these magical ingredients, she restored the crystal's power.",
-        type: "assistant",
-        timestamp: Date.now() - 1000 * 60 * 3,
-    },
-    {
-        id: "9",
-        walletAddress: "0xUserWallet1",
-        message: "Did it work? Did the old oak tree start speaking again?",
-        type: "user",
-        timestamp: Date.now() - 1000 * 60 * 2,
-    },
-    {
-        id: "10",
-        walletAddress: "0xAssistantWallet",
-        message:
-            "Yes! The moment the crystal began glowing brightly again, the old oak's leaves rustled with joy, and its deep, wise voice returned. It thanked Luna for her help and shared even more wonderful stories about the forest's ancient magic.",
-        type: "assistant",
-        timestamp: Date.now() - 1000 * 60 * 1,
-    },
-    {
-        id: "11",
-        walletAddress: "0xAssistantWallet",
-        message:
-            "From that day forward, Luna became known as the Guardian of the Whispering Woods, and she made sure to visit the old oak tree every day to hear its wonderful tales.",
-        type: "assistant",
-        timestamp: Date.now(),
-    },
-    {
-        id: "12",
-        walletAddress: "0xUserWallet1",
-        message:
-            "That was such a beautiful story! I loved how Luna helped save the old oak tree's voice.",
-        type: "user",
-        timestamp: Date.now() + 1000 * 60 * 1,
-    },
-    {
-        id: "13",
-        walletAddress: "0xAssistantWallet",
-        message:
-            "I'm glad you enjoyed it! The story teaches us that even the smallest acts of kindness can help preserve the magic in our world.",
-        type: "assistant",
-        timestamp: Date.now() + 1000 * 60 * 2,
-    },
-];
 
 export default function ChatGlobal() {
     const [value, setValue] = useState("");
-    const [chatMessages, setChatMessages] = useState(messages);
     const bottomRef = useRef<HTMLDivElement>(null);
-    const { isAuthenticated } = useAuth();
-    const isConnected = true && isAuthenticated;
-    const userWallet = "0xUserWallet1"; // Replace with actual wallet from context
+    const [messages, setMessages] = useState<ConversationMessage[]>([]);
+    const { isAuthenticated, isAuthenticating, userId } = useAuthStore()
+    const isConnected = !isAuthenticating && isAuthenticated;
+    const socketRef = useRef<Socket | null>(null);
+
 
 
     const formatWalletAddress = (address: string) => {
-        if (address.length <= 8) return address
+        if (!address || address.length <= 8) return address
         return `${address.slice(0, 4)}...${address.slice(-4)}`
     }
+    const fetchMessages = async () => {
+        const { data } = await instance.get('/messages');
+        setMessages(data as ConversationMessage[]);
+    };
 
-    const handleSubmit = () => {
-        if (!value.trim()) return;
-        setChatMessages(prev => [
-            ...prev,
-            {
-                id: (prev.length + 1).toString(),
-                walletAddress: userWallet,
+    const handleSubmit = async () => {
+        try {
+            if (!value.trim()) return;
+            socketRef.current?.emit("sendMessage", {
                 message: value,
-                type: "user",
-                timestamp: Date.now(),
-            }
-        ]);
-        setValue("");
+                userId: userId,
+            });
+            setValue("");
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        } catch (_error) {
+            toast.error("Failed to send message. Please try again.");
+        }
     };
 
     useEffect(() => {
-        bottomRef.current?.scrollIntoView({ behavior: "smooth" });
-    }, [chatMessages]);
+        fetchMessages();
+    }, []);
+
+
+    useEffect(() => {
+        socketRef.current = io("http://localhost:8080")
+        socketRef.current.on("newMessage", (message: ConversationMessage) => {
+            setMessages((prev) => {
+                if (prev.some((m) => m.id === message.id)) return prev;
+                return [...prev, message];
+            });
+            bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+        });
+
+        socketRef.current.on("connect", () => {
+            console.log("Connected to chat server");
+        });
+
+        socketRef.current.on("disconnect", () => {
+            console.log("Disconnected from chat server");
+        });
+    }, []);
+
 
     return (<>
         <motion.div className="relative w-[87%] mx-auto overflow-hidden items-center gap-2 px-3 rounded-xl bg-gradient-to-b from-neutral-100/80 to-neutral-100 border border-neutral-200/50 group transition-all duration-300 lg:w-[60%] hover:border-neutral-300"
@@ -177,34 +105,33 @@ export default function ChatGlobal() {
                 <div className="space-y-4">
 
                     {
-                        !isConnected || chatMessages.length === 0 ? (
+                        !isConnected || messages.length === 0 ? (
                             <div className="flex justify-center items-center text-muted-foreground py-8">
                                 <p>
                                     No messages yet. {isConnected ? "Start the conversation!" : "Connect your wallet to see messages."}
                                 </p>
                             </div>
                         ) : (
-                            chatMessages.map((message) => (
+                            messages && messages.map((message) => (
                                 <ChatMessage
                                     key={message.id}
                                     id={message.id}
-                                    type={message.type === "user" ? "outgoing" : "incoming"}
+                                    type={message.userId === userId ? "outgoing" : "incoming"}
                                     variant="bubble"
-                                    walletAddress={message.walletAddress}
-                                    timestamp={message.timestamp}
+                                    timestamp={new Date(message.createdAt).getTime()}
                                 >
-                                    {message.type === "assistant" && (
+                                    {message.userId !== userId && (
                                         <ChatMessageAvatar />
                                     )}
-                                    <ChatMessageContent content={message.message} walletAddress={formatWalletAddress(message.walletAddress)} timestamp={message.timestamp} />
-                                    {message.type === "user" && (
+                                    <ChatMessageContent content={message.content} walletAddress={formatWalletAddress(message.walletAddress)} timestamp={new Date(message.createdAt).getTime()} />
+                                    {message.userId === userId && (
                                         <ChatMessageAvatar />
                                     )}
                                 </ChatMessage>
                             ))
                         )
                     }
-                    <div ref={bottomRef} />
+                    <div className="h-2" ref={bottomRef} />
                 </div>
             </ScrollArea>
             {isConnected ?

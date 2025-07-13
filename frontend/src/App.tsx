@@ -8,8 +8,8 @@ import { PhantomWalletAdapter, SolflareWalletAdapter, TorusWalletAdapter } from 
 import { useMemo } from "react";
 import { ConnectionProvider } from "@solana/wallet-adapter-react";
 import { clusterApiUrl } from "@solana/web3.js";
-import { AuthProvider } from "./contexts/authProvider";
 import Footer from "./modules/main/Footer";
+import { Toaster } from "./components/ui/sonner";
 
 
 
@@ -18,21 +18,18 @@ function App() {
   const endpoint = useMemo(() => clusterApiUrl("devnet"), []);
 
   return (
-
     <ConnectionProvider endpoint={endpoint}>
       <SolanaWalletProvider wallets={wallets} autoConnect>
         <WalletModalProvider>
-          <AuthProvider>
-            <Navbar />
-            <Hero />
-            <Features />
-            <ChatGlobal />
-            <Footer />
-          </AuthProvider>
+          <Navbar />
+          <Hero />
+          <Features />
+          <ChatGlobal />
+          <Footer />
+          <Toaster />
         </WalletModalProvider>
       </SolanaWalletProvider>
     </ConnectionProvider>
-
   );
 }
 

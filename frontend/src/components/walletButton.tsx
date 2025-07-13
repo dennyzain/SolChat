@@ -2,7 +2,7 @@
 
 import { useWallet } from "@solana/wallet-adapter-react"
 import { useWalletModal } from "@solana/wallet-adapter-react-ui"
-import { useAuth } from "../hooks/useAuth"
+import { useAuthStore } from '../store'
 import { LiquidButton } from "./ui/buttons/liquid"
 import { Button } from "./ui/buttons/classic"
 import {
@@ -22,8 +22,9 @@ import { LAMPORTS_PER_SOL } from "@solana/web3.js"
 export function WalletButton() {
     const { connection } = useConnection()
     const { publicKey, wallet, disconnect, connecting, connected } = useWallet()
+    const walletContext = useWallet()
     const { setVisible } = useWalletModal()
-    const { isAuthenticated, authenticate, isAuthenticating } = useAuth()
+    const { isAuthenticated, isAuthenticating, authenticate, logout } = useAuthStore()
     const [balance, setBalance] = useState<number | null>(null)
     const [copied, setCopied] = useState(false)
 
@@ -138,7 +139,7 @@ export function WalletButton() {
 
                     {!isAuthenticated && (
                         <>
-                            <DropdownMenuItem onClick={authenticate} className="gap-2">
+                            <DropdownMenuItem onClick={() => authenticate(walletContext)} className="gap-2">
                                 <Key className="w-4 h-4" />
                                 Authenticate for Chat
                             </DropdownMenuItem>
@@ -158,7 +159,10 @@ export function WalletButton() {
 
                     <DropdownMenuSeparator />
 
-                    <DropdownMenuItem onClick={disconnect} className="gap-2 text-red-600">
+                    <DropdownMenuItem onClick={() => {
+                        disconnect()
+                        logout()
+                    }} className="gap-2 text-red-600">
                         <LogOut className="w-4 h-4" />
                         Disconnect
                     </DropdownMenuItem>

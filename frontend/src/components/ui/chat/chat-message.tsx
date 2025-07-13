@@ -54,7 +54,6 @@ interface ChatMessageProps
     VariantProps<typeof chatMessageVariants> {
     children?: React.ReactNode;
     id: string;
-    walletAddress: string;
     timestamp: number;
 }
 
