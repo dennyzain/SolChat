@@ -1,7 +1,7 @@
 import Hero from "./modules/main/Hero";
 import Features from "./modules/main/Features";
 import Navbar from "./modules/main/Navbar";
-import ChatGlobal from "./modules/chat/ChatGlobal";
+import ChatGlobal from "./modules/chat/ChatGlobalContainer";
 import { WalletModalProvider } from '@solana/wallet-adapter-react-ui';
 import { WalletProvider as SolanaWalletProvider } from "@solana/wallet-adapter-react"
 import { PhantomWalletAdapter, SolflareWalletAdapter, TorusWalletAdapter } from '@solana/wallet-adapter-wallets'

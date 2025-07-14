@@ -1,19 +1,13 @@
-import { useState, useRef, useEffect } from "react";
-import { ChatInput } from "../../components/ui/chat/chat-input";
+import { ChatInput } from "../../../components/ui/chat/chat-input";
 import {
     ChatMessage,
     ChatMessageAvatar,
     ChatMessageContent,
-} from "../../components/ui/chat/chat-message";
+} from "../../../components/ui/chat/chat-message";
 import { motion } from "motion/react";
-import { useAuthStore } from '../../store'
-import { ScrollArea } from "../../components/ui/scroll-area";
+import { ScrollArea } from "../../../components/ui/scroll-area";
 import clsx from "clsx";
-import { instance } from "../../services/interceptor";
-import { toast } from "sonner";
-import { io, Socket } from "socket.io-client";
-
-
+import type { RefObject, Dispatch, SetStateAction, } from "react";
 
 interface ConversationMessage {
     id: string,
@@ -23,66 +17,29 @@ interface ConversationMessage {
     createdAt: Date
 }
 
+interface ChatGlobalComponentProps {
+    value: string;
+    setValue: Dispatch<SetStateAction<string>>;
+    bottomRef: RefObject<HTMLDivElement | null>
+    messages: ConversationMessage[];
+    isConnected: boolean;
+    userId: string | null;
+    formatWalletAddress: (address: string) => string;
+    handleSubmit: () => Promise<void>;
+}
 
-export default function ChatGlobal() {
-    const [value, setValue] = useState("");
-    const bottomRef = useRef<HTMLDivElement>(null);
-    const [messages, setMessages] = useState<ConversationMessage[]>([]);
-    const { isAuthenticated, isAuthenticating, userId } = useAuthStore()
-    const isConnected = !isAuthenticating && isAuthenticated;
-    const socketRef = useRef<Socket | null>(null);
+export default function ChatGlobalComponent({
+    value,
+    setValue,
+    bottomRef,
+    messages,
+    isConnected,
+    userId,
+    formatWalletAddress,
+    handleSubmit
+}: ChatGlobalComponentProps) {
 
-
-
-    const formatWalletAddress = (address: string) => {
-        if (!address || address.length <= 8) return address
-        return `${address.slice(0, 4)}...${address.slice(-4)}`
-    }
-    const fetchMessages = async () => {
-        const { data } = await instance.get('/messages');
-        setMessages(data as ConversationMessage[]);
-    };
-
-    const handleSubmit = async () => {
-        try {
-            if (!value.trim()) return;
-            socketRef.current?.emit("sendMessage", {
-                message: value,
-                userId: userId,
-            });
-            setValue("");
-            // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        } catch (_error) {
-            toast.error("Failed to send message. Please try again.");
-        }
-    };
-
-    useEffect(() => {
-        fetchMessages();
-    }, []);
-
-
-    useEffect(() => {
-        socketRef.current = io("http://localhost:8080")
-        socketRef.current.on("newMessage", (message: ConversationMessage) => {
-            setMessages((prev) => {
-                if (prev.some((m) => m.id === message.id)) return prev;
-                return [...prev, message];
-            });
-            bottomRef.current?.scrollIntoView({ behavior: "smooth" });
-        });
-
-        socketRef.current.on("connect", () => {
-            console.log("Connected to chat server");
-        });
-
-        socketRef.current.on("disconnect", () => {
-            console.log("Disconnected from chat server");
-        });
-    }, []);
-
-
-    return (<>
+    return (
         <motion.div className="relative w-[87%] mx-auto overflow-hidden items-center gap-2 px-3 rounded-xl bg-gradient-to-b from-neutral-100/80 to-neutral-100 border border-neutral-200/50 group transition-all duration-300 lg:w-[60%] hover:border-neutral-300"
             initial={{ opacity: 0, y: 100 }}
             animate={{ opacity: 1, y: 0 }}
@@ -142,6 +99,5 @@ export default function ChatGlobal() {
                 </div>
             }
         </motion.div >
-    </>
     );
 }
