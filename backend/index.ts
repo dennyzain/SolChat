@@ -4,7 +4,7 @@ import { createServer } from "node:http";
 import authRoutes from "./routes/auth";
 import chatRoutes from "./routes/chat";
 import cors from "cors";
-import { authenticateSocket } from "./middleware/authSocket";
+import { authenticateSocket, authenticateToken } from "./middleware/auth";
 import { registerChatSocket } from "./controllers/chat";
 
 const app = express();
@@ -16,13 +16,12 @@ const io = new Server(server, {
     }
 });
 
-
 app.use(cors());
 app.use(express.json());
 app.use("/auth", authRoutes);
-app.use(authenticateSocket)
-registerChatSocket(io);
+app.use(authenticateToken)
 app.use("/messages", chatRoutes);
+registerChatSocket(io);
 
 
 server.listen(8080, () => {

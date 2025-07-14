@@ -1,6 +1,7 @@
 import type { Server } from "socket.io";
 import { prisma } from "../prisma/db";
 import type { Request, Response } from "express";
+import { authenticateSocket } from "../middleware/auth";
 
 export const getMessages = async (req: Request, res: Response) => {
 
@@ -27,6 +28,7 @@ export const getMessages = async (req: Request, res: Response) => {
 }
 
 export const registerChatSocket = (io: Server) => {
+    io.use(authenticateSocket)
     io.on("connection", (socket) => {
         console.log("a user connected");
         socket.on("sendMessage", async (context) => {
