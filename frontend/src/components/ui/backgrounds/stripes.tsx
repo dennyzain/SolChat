@@ -191,7 +191,7 @@ export function StripeGuides({
                                             transition={{
                                                 duration: animationDuration,
                                                 repeat: Number.POSITIVE_INFINITY,
-                                                ease: easingFunctions[easing],
+                                                ease: easingFunctions[easing] as any,
                                                 delay: index * animationDelay,
                                             }}
                                         />

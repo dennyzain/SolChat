@@ -24,7 +24,6 @@ interface ChatGlobalComponentProps {
     messages: ConversationMessage[];
     isConnected: boolean;
     userId: string | null;
-    formatWalletAddress: (address: string) => string;
     handleSubmit: () => Promise<void>;
 }
 
@@ -35,7 +34,6 @@ export default function ChatGlobalComponent({
     messages,
     isConnected,
     userId,
-    formatWalletAddress,
     handleSubmit
 }: ChatGlobalComponentProps) {
 
@@ -45,8 +43,8 @@ export default function ChatGlobalComponent({
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
         >
-            <div className="flex flex-col gap-2 px-10">
-                <h1 className="text-2xl font-bold">Global Chat Room</h1>
+            <div className="flex flex-col gap-1 px-10 py-3">
+                <h1 className="text-xl font-light">Global Chat Room</h1>
                 <div className="flex items-center gap-2 text-xs text-muted-foreground">
                     <div className={clsx(
                         "w-2 h-2 rounded-full animate-pulse",
@@ -56,7 +54,7 @@ export default function ChatGlobalComponent({
                 </div>
             </div>
 
-            <ScrollArea className={clsx("w-[95%] relative px-5 mx-auto pb-16 pt-5 h-[700px] lg:w-[90%]", {
+            <ScrollArea className={clsx("w-[95%] relative px-5 mx-auto border rounded-xl border-neutral-300 pb-16 pt-5 h-[700px] lg:w-[90%] ", {
                 "h-[500px]": !isConnected,
             })}>
                 <div className="space-y-4">
@@ -78,9 +76,9 @@ export default function ChatGlobalComponent({
                                     timestamp={new Date(message.createdAt).getTime()}
                                 >
                                     {message.userId !== userId && (
-                                        <ChatMessageAvatar />
+                                        <ChatMessageAvatar walletAddress={message.walletAddress} />
                                     )}
-                                    <ChatMessageContent content={message.content} walletAddress={formatWalletAddress(message.walletAddress)} timestamp={new Date(message.createdAt).getTime()} />
+                                    <ChatMessageContent content={message.content} walletAddress={message.walletAddress} timestamp={new Date(message.createdAt).getTime()} />
                                     {message.userId === userId && (
                                         <ChatMessageAvatar />
                                     )}
@@ -88,11 +86,11 @@ export default function ChatGlobalComponent({
                             ))
                         )
                     }
-                    <div className="h-2" ref={bottomRef} />
+                    <div className="h-1" ref={bottomRef} />
                 </div>
             </ScrollArea>
             {isConnected ?
-                <ChatInput type="text" placeholder="Type your message..." value={value} onChange={(e) => setValue(e.target.value)} handleSubmit={handleSubmit} containerClassName="flex items-center gap-2 left-0 absolute bottom-0 w-full px-10 justify-center text-black-pearl bg-white backdrop-blur-lg p-4" />
+                <ChatInput type="text" placeholder="Type your message..." value={value} onChange={(e) => setValue(e.target.value)} disabled={!isConnected} handleSubmit={handleSubmit} containerClassName="flex items-center gap-2 left-0 absolute bottom-0 w-full px-10 justify-center text-black-pearl bg-white backdrop-blur-lg p-4" />
                 :
                 <div className="text-center gap-2 left-0 absolute bottom-0 w-full text-black-pearl bg-white backdrop-blur-lg p-4">
                     <p className="text-sm text-gray-500">Please connect your wallet to chat</p>

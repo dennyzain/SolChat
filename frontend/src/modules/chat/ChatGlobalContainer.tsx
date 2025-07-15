@@ -18,14 +18,10 @@ export default function ChatGlobalContainer() {
     const [value, setValue] = useState("");
     const bottomRef = useRef<HTMLDivElement>(null);
     const [messages, setMessages] = useState<ConversationMessage[]>([]);
-    const { isAuthenticated, isAuthenticating, userId, jwtToken } = useAuthStore()
-    const isConnected = !isAuthenticating && isAuthenticated;
+    const { userId, jwtToken } = useAuthStore()
+    const [isConnectedChat, setIsConnectedChat] = useState(false);
     const socketRef = useRef<Socket | null>(null);
 
-    const formatWalletAddress = (address: string) => {
-        if (!address || address.length <= 8) return address
-        return `${address.slice(0, 4)}...${address.slice(-4)}`
-    }
     const fetchMessages = async () => {
         const { data } = await instance.get('/messages');
         setMessages(data as ConversationMessage[]);
@@ -37,8 +33,10 @@ export default function ChatGlobalContainer() {
             socketRef.current?.emit("sendMessage", {
                 message: value,
                 userId: userId,
-            });
+            }
+            );
             setValue("");
+            bottomRef.current?.scrollIntoView({ behavior: "smooth" });
             // eslint-disable-next-line @typescript-eslint/no-unused-vars
         } catch (_error) {
             toast.error("Failed to send message. Please try again.");
@@ -46,11 +44,14 @@ export default function ChatGlobalContainer() {
     };
 
     useEffect(() => {
-        fetchMessages();
-    }, []);
+        if (jwtToken) {
+            fetchMessages();
+        }
+    }, [jwtToken]);
 
 
     useEffect(() => {
+        if (!jwtToken) return;
         socketRef.current = io("http://localhost:8080", {
             auth: {
                 token: jwtToken
@@ -65,14 +66,42 @@ export default function ChatGlobalContainer() {
         });
 
         socketRef.current.on("connect", () => {
-            console.log("Connected to chat server");
+            if (jwtToken) {
+                setIsConnectedChat(true);
+
+            }
+        });
+        socketRef.current.on("connect_error", () => {
+            toast.error("Failed to connect to chat server.");
+            setIsConnectedChat(false);
         });
 
-        socketRef.current.on("disconnect", () => {
-            console.log("Disconnected from chat server");
+        socketRef.current.on("error", () => {
+            toast.error("A socket error occurred.");
+            setIsConnectedChat(false);
         });
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
+
+        socketRef.current.on("reconnect_error", () => {
+            toast.error("Reconnection to chat server failed.");
+            setIsConnectedChat(false);
+        });
+        socketRef.current.on("disconnect", (reason) => {
+            toast.error(`Disconnected: ${reason}`);
+            setIsConnectedChat(false);
+        });
+        socketRef.current.on("reconnect_attempt", () => {
+            toast.info("Reconnecting to chat server...");
+        });
+
+        socketRef.current.on("reconnect", () => {
+            setIsConnectedChat(true);
+        });
+
+        return () => {
+            socketRef.current?.disconnect();
+            setIsConnectedChat(false);
+        }
+    }, [jwtToken]);
 
 
     return (
@@ -81,9 +110,8 @@ export default function ChatGlobalContainer() {
             setValue={setValue}
             bottomRef={bottomRef}
             messages={messages}
-            isConnected={isConnected}
+            isConnected={isConnectedChat}
             userId={userId}
-            formatWalletAddress={formatWalletAddress}
             handleSubmit={handleSubmit}
         />
     )

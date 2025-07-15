@@ -1,9 +1,9 @@
-import { cn } from "@/lib/utils";
+import { cn } from "../../../lib/utils";
 import { type VariantProps, cva } from "class-variance-authority";
 import { UserIcon } from "lucide-react";
 import React, { type ReactNode } from "react";
 import { motion, type HTMLMotionProps } from 'motion/react';
-import clsx from "clsx";
+import { stringToGradient } from "../../../helper/generateGradientColor";
 
 const chatMessageVariants = cva("flex gap-4 w-full", {
     variants: {
@@ -13,8 +13,8 @@ const chatMessageVariants = cva("flex gap-4 w-full", {
             full: "p-5",
         },
         type: {
-            incoming: "justify-start mr-auto",
-            outgoing: "justify-end ml-auto",
+            incoming: "justify-start items-center mr-auto",
+            outgoing: "justify-end items-center ml-auto w-full",
         },
     },
     compoundVariants: [
@@ -94,8 +94,8 @@ const chatMessageAvatarVariants = cva(
     {
         variants: {
             type: {
-                incoming: "ring-border ",
-                outgoing: "ring-muted-foreground/30",
+                incoming: "ring-border bg-white ",
+                outgoing: "ring-muted-foreground/30 bg-white",
             },
         },
         defaultVariants: {
@@ -107,20 +107,23 @@ const chatMessageAvatarVariants = cva(
 interface ChatMessageAvatarProps extends React.HTMLAttributes<HTMLDivElement> {
     imageSrc?: string;
     icon?: ReactNode;
+    walletAddress?: string;
 }
 
 const ChatMessageAvatar = React.forwardRef<
     HTMLDivElement,
     ChatMessageAvatarProps
->(({ className, icon: iconProps, imageSrc, ...props }, ref) => {
+>(({ className, icon: iconProps, imageSrc, walletAddress, ...props }, ref) => {
     const context = useChatMessage();
     const type = context?.type ?? "incoming";
     const icon =
         iconProps ?? <UserIcon />;
+    const bgStyle = walletAddress ? { background: stringToGradient(walletAddress) } : undefined;
     return (
         <div
             ref={ref}
             className={cn(chatMessageAvatarVariants({ type, className }))}
+            style={bgStyle}
             {...props}
         >
             {imageSrc ? (
@@ -139,7 +142,6 @@ const ChatMessageAvatar = React.forwardRef<
 });
 ChatMessageAvatar.displayName = "ChatMessageAvatar";
 
-// Content component
 
 const chatMessageContentVariants = cva("flex flex-col gap-2", {
     variants: {
@@ -181,29 +183,27 @@ interface ChatMessageContentProps extends React.HTMLAttributes<HTMLDivElement> {
 const ChatMessageContent = React.forwardRef<
     HTMLDivElement,
     ChatMessageContentProps
->(({ className, content, children, walletAddress, timestamp, ...props }, ref) => {
+>(({ className, content, children, walletAddress, timestamp, id, ...props }, ref) => {
     const context = useChatMessage();
 
     const variant = context?.variant ?? "default";
     const type = context?.type ?? "incoming";
 
     return (
-        <>
-            <div className={clsx("flex flex-col justify-between text-xs text-black-pearl mb-1", type === "incoming" ? "items-start" : "items-end")}>
-                <div className="flex items-center gap-2 py-2">
-                    <span className="truncate max-w-[60%]">{walletAddress}</span>
-                    <span className="text-xs">{new Date(timestamp ?? 0).toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" })}</span>
-                </div>
-                <div
-                    ref={ref}
-                    className={cn(chatMessageContentVariants({ variant, type, className }))}
-                    {...props}
-                >
-                    {content.length > 0 && <p className="text-sm font-light break-words whitespace-pre-wrap">{content}</p>}
-                    {children}
-                </div>
-            </div >
-        </>
+        <div key={id} className={cn("flex flex-col justify-between text-xs text-black-pearl mb-1", type === "incoming" ? "items-start" : "items-end")}>
+            <div className="flex items-center gap-2 py-2">
+                <span className="truncate">{walletAddress?.substring(0, 9)}...</span>
+                <span className="text-xs">{new Date(timestamp ?? 0).toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" })}</span>
+            </div>
+            <div
+                ref={ref}
+                className={cn(chatMessageContentVariants({ variant, type, className }))}
+                {...props}
+            >
+                {content.length > 0 && <p className="text-sm font-light break-words whitespace-pre-wrap">{content}</p>}
+                {children}
+            </div>
+        </div >
     );
 });
 ChatMessageContent.displayName = "ChatMessageContent";

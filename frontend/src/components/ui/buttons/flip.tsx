@@ -1,6 +1,3 @@
-'use client';
-
-import * as React from 'react';
 import {
   type HTMLMotionProps,
   type Transition,
@@ -8,7 +5,7 @@ import {
   motion,
 } from 'motion/react';
 
-import { cn } from '@/lib/utils';
+import { cn } from '../../../lib/utils';
 
 type FlipDirection = 'top' | 'bottom' | 'left' | 'right';
 

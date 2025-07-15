@@ -1,4 +1,3 @@
-/* eslint-disable react-refresh/only-export-components */
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import { useWallet } from "@solana/wallet-adapter-react"
@@ -71,13 +70,14 @@ export async function authenticateWithWallet(
             nonce: responseChallenge.createdChallenge?.nonce,
         })
 
-        const decodedToken = jwtDecode(responseVerify.token)
-        setUserId(decodedToken.userId)
+        const decodedToken: { userId: string } = jwtDecode(responseVerify.token)
+        setUserId(decodedToken?.userId)
         setJwtToken(responseVerify.token)
         setIsAuthenticated(true)
         toast.success("Successfully authenticated!")
     } catch (error) {
         console.error("Authentication failed:", error)
+        setIsAuthenticated(false)
         toast.error("Authentication failed. Please try again.")
     } finally {
         setIsAuthenticating(false)

@@ -1,6 +1,4 @@
-import * as React from "react"
-
-import { cn } from "@/lib/utils"
+import { cn } from "../../../lib/utils"
 import { Send } from "lucide-react"
 import { Button } from "../buttons/classic"
 
@@ -9,7 +7,7 @@ interface ChatInputProps extends React.ComponentProps<"input"> {
     containerClassName?: string
 }
 
-function ChatInput({ className, type, handleSubmit, disabled, containerClassName, ...props }: ChatInputProps) {
+function ChatInput({ className, type, handleSubmit, value, disabled, containerClassName, ...props }: ChatInputProps) {
     const onFormSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         handleSubmit();
@@ -26,9 +24,10 @@ function ChatInput({ className, type, handleSubmit, disabled, containerClassName
                     className
                 )}
                 disabled={disabled}
+                value={value}
                 {...props}
             />
-            <Button type="submit" disabled={disabled} ><Send /></Button>
+            <Button type="submit" disabled={disabled || !value} ><Send /></Button>
         </form>
     )
 }

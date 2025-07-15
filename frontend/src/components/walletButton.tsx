@@ -1,5 +1,3 @@
-"use client"
-
 import { useWallet } from "@solana/wallet-adapter-react"
 import { useWalletModal } from "@solana/wallet-adapter-react-ui"
 import { useAuthStore } from '../store'
@@ -18,6 +16,7 @@ import { ChevronDown, Copy, ExternalLink, LogOut, Wallet, CheckCircle, Key } fro
 import { useState, useEffect } from "react"
 import { useConnection } from "@solana/wallet-adapter-react"
 import { LAMPORTS_PER_SOL } from "@solana/web3.js"
+import { formatAddress } from "../helper/formatAddress"
 
 export function WalletButton() {
     const { connection } = useConnection()
@@ -28,7 +27,6 @@ export function WalletButton() {
     const [balance, setBalance] = useState<number | null>(null)
     const [copied, setCopied] = useState(false)
 
-    // Fetch wallet balance
     useEffect(() => {
         if (publicKey && connected) {
             connection
@@ -50,10 +48,6 @@ export function WalletButton() {
             setCopied(true)
             setTimeout(() => setCopied(false), 2000)
         }
-    }
-
-    const formatAddress = (address: string) => {
-        return `${address.slice(0, 4)}...${address.slice(-4)}`
     }
 
     const openInExplorer = () => {

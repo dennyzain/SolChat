@@ -15,6 +15,10 @@ export default tseslint.config([
       reactHooks.configs['recommended-latest'],
       reactRefresh.configs.vite,
     ],
+    rules: {
+      'react-refresh/only-export-components': 'off',
+      '@typescript-eslint/no-explicit-any': 'off',
+    },
     languageOptions: {
       ecmaVersion: 2020,
       globals: globals.browser,
