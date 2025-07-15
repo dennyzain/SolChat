@@ -4,6 +4,7 @@
   "scripts": {
     "start": "bun run index.ts",
     "dev": "bun run --watch --env-file=.env index.ts",
+    "build-prod": "bun build index.ts --outdir dist",
     "prisma:pull": "prisma db pull",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev --name solchat",

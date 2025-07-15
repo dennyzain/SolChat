@@ -54,7 +54,7 @@ export default function ChatGlobalComponent({
                 </div>
             </div>
 
-            <ScrollArea className={clsx("w-[95%] relative px-5 mx-auto border rounded-xl border-neutral-300 pb-16 pt-5 h-[700px] lg:w-[90%] ", {
+            <ScrollArea className={clsx("w-[95%] relative px-5 mx-auto border rounded-xl border-neutral-300 pt-5 h-[700px] lg:w-[90%] ", {
                 "h-[500px]": !isConnected,
             })}>
                 <div className="space-y-4">
@@ -86,7 +86,7 @@ export default function ChatGlobalComponent({
                             ))
                         )
                     }
-                    <div className="h-1" ref={bottomRef} />
+                    <div className="mt-18" ref={bottomRef} />
                 </div>
             </ScrollArea>
             {isConnected ?

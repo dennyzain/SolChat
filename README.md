@@ -8,10 +8,9 @@ This guide will help you run the SolChat application, which consists of a Bun/Ex
 
 ## Prerequisites
 
-- **Node.js** (for frontend, if not using Bun)
+- **Node.js** (if not using Bun)
 - **Bun** (v1.2.1 or later) – [Install Bun](https://bun.sh/docs/installation)
-- **Docker** (optional, for containerized setup)
-- **PostgreSQL** database (local or remote)
+- **PostgreSQL** database (local or remote or docker)
 
 ---
 
@@ -96,27 +95,7 @@ The frontend will run on [http://localhost:5173](http://localhost:5173).
 
 ---
 
-## 3. Docker Setup (Optional)
-
-### a. Backend
-
-```bash
-cd backend
-docker build -t solchat-backend .
-docker run --env-file .env -p 8080:8080 solchat-backend
-```
-
-### b. Frontend
-
-```bash
-cd frontend
-docker build -t solchat-frontend .
-docker run -p 5173:5173 solchat-frontend
-```
-
----
-
-## 4. Authentication Flow
+## 3. Authentication Flow
 
 This document outlines the step-by-step process for authenticating a user using their wallet with SWIS. It includes the challenge-response mechanism for proving ownership of a wallet and generating a JWT token for access.
 
@@ -198,7 +177,7 @@ If the signature is valid, the server responds with an access token.
 https://solana.com/id/developers/cookbook/wallets/sign-message
 
 
-## 5. Useful Scripts
+## 4. Useful Scripts
 
 From the `backend/` directory:
 
@@ -215,7 +194,7 @@ From the `frontend/` directory:
 
 ---
 
-## 6. Notes
+## 5. Notes
 
 - The backend expects the frontend to run on `http://localhost:5173` (see CORS settings).
 - The backend listens on port `8080`.

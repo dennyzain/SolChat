@@ -36,7 +36,6 @@ export default function ChatGlobalContainer() {
             }
             );
             setValue("");
-            bottomRef.current?.scrollIntoView({ behavior: "smooth" });
             // eslint-disable-next-line @typescript-eslint/no-unused-vars
         } catch (_error) {
             toast.error("Failed to send message. Please try again.");
@@ -49,10 +48,14 @@ export default function ChatGlobalContainer() {
         }
     }, [jwtToken]);
 
+    useEffect(() => {
+        bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+    }, [messages]);
+
 
     useEffect(() => {
         if (!jwtToken) return;
-        socketRef.current = io("http://localhost:8080", {
+        socketRef.current = io(import.meta.env.VITE_API_URL, {
             auth: {
                 token: jwtToken
             }
@@ -62,7 +65,6 @@ export default function ChatGlobalContainer() {
                 if (prev.some((m) => m.id === message.id)) return prev;
                 return [...prev, message];
             });
-            bottomRef.current?.scrollIntoView({ behavior: "smooth" });
         });
 
         socketRef.current.on("connect", () => {

@@ -7,5 +7,3 @@ COPY package.json .
 RUN bun install
 
 COPY . .    
-
-RUN bun build
