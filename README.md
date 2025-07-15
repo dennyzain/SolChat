@@ -1,5 +1,6 @@
 # SolChat
 
+<img width="2446" height="2020" alt="Capture-2025-07-15-51854 PM" src="https://github.com/user-attachments/assets/b5a64662-0996-4652-8063-fd4068a8cb91" />
 SolChat is a chat application built on Solana. It allows users to chat with each other on a global chat room.
 
 ## Setup & Running Guide
