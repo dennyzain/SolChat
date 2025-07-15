@@ -22,8 +22,6 @@ export const getMessages = async (req: Request, res: Response) => {
         createdAt: msg.createdAt
     }));
 
-    console.log(formattedMessages, "formattedMessages")
-
     res.json(formattedMessages);
 }
 
